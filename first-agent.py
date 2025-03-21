@@ -1,14 +1,14 @@
-from agents import Agent, set_default_openai_key
+from agents import Agent
 from agents import Runner, InputGuardrail, GuardrailFunctionOutput
 from pydantic import BaseModel
 import asyncio
 import os 
 from  dotenv import load_dotenv
 
-# Setting Up api key 
+# Setup api key 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
-set_default_openai_key(api_key)
+os.environ["OPENAI_API_KEY"] = api_key
 
 
 class HomeworkOutput(BaseModel):

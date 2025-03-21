@@ -1,14 +1,13 @@
-from agents import set_default_openai_key
 from agents import Agent , ModelSettings, function_tool, Runner
 from pydantic import BaseModel
 import asyncio
 import os
 from dotenv import load_dotenv
 
-# Setting Up api key 
+# Setup api key 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
-set_default_openai_key(api_key)
+os.environ["OPENAI_API_KEY"] = api_key
 
 @function_tool
 def get_weather(city: str) -> str:
@@ -34,6 +33,17 @@ calender_agent = Agent(
     output_type=CalenderEvent,
 )
 
+# Agent Cloning
+
+class DateFetch(BaseModel):
+    date: str
+
+date_extractor_agent = calender_agent.clone(
+    name= "Date Extractor",
+    instructions = "Fetch the date",
+    output_type=DateFetch,
+)
+
 async def main():
     result = await Runner.run(agent,"Weather of Dhaka")
 
@@ -47,6 +57,12 @@ async def main():
     print("Event Name:", calendar_event.name)
     print("Event Date:", calendar_event.date)
     print("Participants:", calendar_event.participations)
+
+
+    # date extractor
+    result = await Runner.run(date_extractor_agent,input_text)
+    date = result.final_output_as(DateFetch)
+    print(date.date)
       
 if __name__ == "__main__":
     asyncio.run(main())
